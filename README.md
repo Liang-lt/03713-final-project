@@ -14,10 +14,10 @@ The analysis began with ATAC-seq quality control (QC) to evaluate mapping qualit
 
 **Tools and Dependecies**: 
 
-ChIPseeker - Enhancer/promoter annotation
-halLiftover - Cross-species coordinate mapping
-HALPER - Syntenic ortholog filtering
-bedtools - Peak intersection & validation
-MEME Suite - Motif enrichment analysis
-HOMER - Alternate motif analysis
-GREAT / g:Profiler - GO and pathway enrichment
+**ChIPseeker** - Enhancer/promoter annotation
+**halLiftover** - Cross-species coordinate mapping
+**HALPER** - Syntenic ortholog filtering
+**bedtools** - Peak intersection & validation
+**MEME Suite** - Motif enrichment analysis
+**HOME**R - Alternate motif analysis
+**GREAT / g:Profiler** - GO and pathway enrichment
