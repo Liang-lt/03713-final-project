@@ -1,0 +1,21 @@
+Conservation Analysis Summary
+===========================
+Spleen Mouse->Human:
+Open regions conserved: 61793
+Open regions not conserved: 11292
+Proportion conserved: .845
+
+Spleen Human->Mouse:
+Open regions conserved: 62613
+Open regions not conserved: 15803
+Proportion conserved: .798
+
+Liver Mouse->Human:
+Open regions conserved: 106790
+Open regions not conserved: 26831
+Proportion conserved: .799
+
+Liver Human->Mouse:
+Open regions conserved: 110218
+Open regions not conserved: 41778
+Proportion conserved: .725

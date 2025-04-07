@@ -1,0 +1,95 @@
+#!/bin/bash
+#SBATCH -p RM-shared
+#SBATCH -t 24:00:00
+#SBATCH --ntasks-per-node=4
+
+# Load bedtools module
+module load bedtools
+
+# Set paths for readability
+ORIG_DIR="/ocean/projects/bio230007p/lliang1/mapping_w_results"
+
+# Original peak files
+LIVER_HUMAN="${ORIG_DIR}/idr.optimal_peak_liver_human.narrowPeak"
+LIVER_MOUSE="${ORIG_DIR}/idr.optimal_peak_liver_mouse.narrowPeak"
+SPLEEN_HUMAN="${ORIG_DIR}/idr.optimal_peak_spleen_human.narrowPeak"
+SPLEEN_MOUSE="${ORIG_DIR}/idr.optimal_peak_spleen_mouse.narrowPeak"
+
+# Create output directory
+mkdir -p ./intersect
+
+# Analyze human tissue comparison
+echo "Analyzing human liver vs spleen comparison..."
+# Find regions open in both liver and spleen
+bedtools intersect -a $LIVER_HUMAN -b $SPLEEN_HUMAN -wa -wb > ./intersect/human_shared_open.bed
+# Find liver-specific open regions
+bedtools intersect -a $LIVER_HUMAN -b $SPLEEN_HUMAN -v > ./intersect/human_liver_specific.bed
+# Find spleen-specific open regions
+bedtools intersect -a $SPLEEN_HUMAN -b $LIVER_HUMAN -v > ./intersect/human_spleen_specific.bed
+
+# Analyze mouse tissue comparison
+echo "Analyzing mouse liver vs spleen comparison..."
+# Find regions open in both liver and spleen
+bedtools intersect -a $LIVER_MOUSE -b $SPLEEN_MOUSE -wa -wb > ./intersect/mouse_shared_open.bed
+# Find liver-specific open regions
+bedtools intersect -a $LIVER_MOUSE -b $SPLEEN_MOUSE -v > ./intersect/mouse_liver_specific.bed
+# Find spleen-specific open regions
+bedtools intersect -a $SPLEEN_MOUSE -b $LIVER_MOUSE -v > ./intersect/mouse_spleen_specific.bed
+
+# Write summary to file
+{
+    # Calculate totals for percentages
+    HUMAN_SHARED=$(wc -l < ./intersect/human_shared_open.bed)
+    HUMAN_LIVER=$(wc -l < ./intersect/human_liver_specific.bed)
+    HUMAN_SPLEEN=$(wc -l < ./intersect/human_spleen_specific.bed)
+    HUMAN_TOTAL=$((HUMAN_SHARED + HUMAN_LIVER + HUMAN_SPLEEN))
+
+    MOUSE_SHARED=$(wc -l < ./intersect/mouse_shared_open.bed)
+    MOUSE_LIVER=$(wc -l < ./intersect/mouse_liver_specific.bed) 
+    MOUSE_SPLEEN=$(wc -l < ./intersect/mouse_spleen_specific.bed)
+    MOUSE_TOTAL=$((MOUSE_SHARED + MOUSE_LIVER + MOUSE_SPLEEN))
+    {
+        echo "Combined Tissue Comparison Analysis"
+        echo "================================="
+        echo "Raw Counts:"
+        echo "-----------"
+        echo "Human Analysis:"
+        echo "Shared regions: $HUMAN_SHARED"
+        echo "Liver-specific: $HUMAN_LIVER" 
+        echo "Spleen-specific: $HUMAN_SPLEEN"
+        echo "Total: $HUMAN_TOTAL"
+        echo ""
+        echo "Mouse Analysis:"
+        echo "Shared regions: $MOUSE_SHARED"
+        echo "Liver-specific: $MOUSE_LIVER"
+        echo "Spleen-specific: $MOUSE_SPLEEN" 
+        echo "Total: $MOUSE_TOTAL"
+        echo ""
+        echo "Proportions:"
+        echo "-----------"
+        echo "Human Proportions:"
+        echo "Shared: $(awk "BEGIN {printf \"%.3f\", $HUMAN_SHARED/$HUMAN_TOTAL}")"
+        echo "Liver-specific: $(awk "BEGIN {printf \"%.3f\", $HUMAN_LIVER/$HUMAN_TOTAL}")"
+        echo "Spleen-specific: $(awk "BEGIN {printf \"%.3f\", $HUMAN_SPLEEN/$HUMAN_TOTAL}")"
+        echo ""
+        echo "Mouse Proportions:"
+        echo "Shared: $(awk "BEGIN {printf \"%.3f\", $MOUSE_SHARED/$MOUSE_TOTAL}")"
+        echo "Liver-specific: $(awk "BEGIN {printf \"%.3f\", $MOUSE_LIVER/$MOUSE_TOTAL}")"
+        echo "Spleen-specific: $(awk "BEGIN {printf \"%.3f\", $MOUSE_SPLEEN/$MOUSE_TOTAL}")"
+    } > ./intersect/combined_analysis.txt
+
+    # Write main summary
+    echo "Tissue Comparison Analysis Summary" | tee ./intersect/tissue_comparison.txt
+    echo "================================" | tee -a ./intersect/tissue_comparison.txt
+    echo "Human Tissue Comparison:" | tee -a ./intersect/tissue_comparison.txt
+    echo "Regions open in both liver and spleen: $HUMAN_SHARED ($(awk "BEGIN {printf \"%.1f%%\", $HUMAN_SHARED*100/$HUMAN_TOTAL}"))" | tee -a ./intersect/tissue_comparison.txt
+    echo "Liver-specific open regions: $HUMAN_LIVER ($(awk "BEGIN {printf \"%.1f%%\", $HUMAN_LIVER*100/$HUMAN_TOTAL}"))" | tee -a ./intersect/tissue_comparison.txt
+    echo "Spleen-specific open regions: $HUMAN_SPLEEN ($(awk "BEGIN {printf \"%.1f%%\", $HUMAN_SPLEEN*100/$HUMAN_TOTAL}"))" | tee -a ./intersect/tissue_comparison.txt
+    echo "Total regions: $HUMAN_TOTAL" | tee -a ./intersect/tissue_comparison.txt
+    echo "" | tee -a ./intersect/tissue_comparison.txt
+    echo "Mouse Tissue Comparison:" | tee -a ./intersect/tissue_comparison.txt
+    echo "Regions open in both liver and spleen: $MOUSE_SHARED ($(awk "BEGIN {printf \"%.1f%%\", $MOUSE_SHARED*100/$MOUSE_TOTAL}"))" | tee -a ./intersect/tissue_comparison.txt
+    echo "Liver-specific open regions: $MOUSE_LIVER ($(awk "BEGIN {printf \"%.1f%%\", $MOUSE_LIVER*100/$MOUSE_TOTAL}"))" | tee -a ./intersect/tissue_comparison.txt
+    echo "Spleen-specific open regions: $MOUSE_SPLEEN ($(awk "BEGIN {printf \"%.1f%%\", $MOUSE_SPLEEN*100/$MOUSE_TOTAL}"))" | tee -a ./intersect/tissue_comparison.txt
+    echo "Total regions: $MOUSE_TOTAL" | tee -a ./intersect/tissue_comparison.txt
+}
