@@ -1,0 +1,14 @@
+#!/bin/bash
+#SBATCH -p RM-shared
+#SBATCH -t 24:00:00
+#SBATCH --ntasks-per-node=4
+
+source ~/.bashrc
+conda activate hal
+
+bash /jet/home/lliang1/03713/repos/halLiftover-postprocessing/halper_map_peak_orthologs.sh \
+-b /jet/home/lliang1/03713/final_project/mapping/idr.optimal_peak_spleen_mouse.narrowPeak \
+-o /jet/home/lliang1/03713/final_project/mapping/halper_result_mouse_human \
+-s Mouse \
+-t Human \
+-c /ocean/projects/bio230007p/ikaplow/Alignments/10plusway-master.hal
