@@ -8,40 +8,8 @@ This project investigates the evolutionary conservation and functional relevance
 We identify orthologous enhancer regions, classify promoters vs enhancers, and validate regulatory activity using ATAC-seq overlap and motif enrichment. The goal is to understand how transcriptional regulation differs or is conserved across species and tissues.
 
 **Workflow Summary:**
-[ATAC-seq QC] 
-    ↓
-[Peak Calling + Filtering]
-    ↓
-[ChIPseeker Annotation → enhancers.bed]
-    ↓
-[halLiftover] ← mm10.hg38.hal + enhancers.bed
-    ↓
-[HALPER Filtering] → high-confidence orthologs
-    ↓
-[ATAC-seq Validation via bedtools intersect]
-    ↓
-[Functional Annotation (GREAT, gProfiler)]
-    ↓
-[Motif Discovery (MEME-ChIP, HOMER)]
+The analysis began with ATAC-seq quality control (QC) to evaluate mapping quality, fragment periodicity, TSS enrichment, and duplicate rates. Based on QC results, liver and spleen tissues were selected for both human and mouse. Next, peak regions were identified and filtered using narrowPeak files. These peaks were then annotated using the ChIPseeker package in R, classifying them as promoters, introns, or distal intergenic regions. High-confidence regulatory elements were extracted and saved as enhancers.bed files. To investigate cross-species regulatory conservation, enhancer coordinates were mapped between human and mouse using halLiftover, which required both the enhancer BED files and the genome alignment file mm10.hg38.hal. The raw liftover output was refined using HALPER, which filters for syntenic, high-identity orthologs. The resulting high-confidence conserved enhancer sets were then validated using bedtools intersect, comparing the orthologous regions to ATAC-seq peaks in the target species to confirm chromatin accessibility. Finally, the biologically relevant enhancer sets will be used for functional enrichment analysis using tools like GREAT and g:Profiler, and motif discovery will be performed using tools such as MEME-ChIP and HOMER to explore regulatory sequence patterns
 
 
 **Directory Structure:**
-/atac_project/
-    ├── data/
-    │   ├── human_liver.bed
-    │   ├── mouse_spleen.bed
-    │   └── ...
-    ├── annotation/
-    │   ├── enhancers.bed
-    │   ├── annotation_pie_chart.pdf
-    ├── liftover/
-    │   ├── lifted_human_to_mouse.bed
-    │   └── halper_filtered.bed
-    ├── validation/
-    │   ├── validated_output.bed
-    ├── motif_discovery/
-    │   ├── meme_out/
-    │   └── homer_out/
-    └── results/
-        ├── summary_plots/
-        └── final_tables/
+
