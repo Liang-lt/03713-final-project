@@ -20,4 +20,4 @@ The analysis began with ATAC-seq quality control (QC) to evaluate mapping qualit
 **bedtools** - Peak intersection & validation
 **MEME Suite** - Motif enrichment analysis
 **HOME**R - Alternate motif analysis
-**GREAT / g:Profiler** - GO and pathway enrichment
+**GREAT** - GO and pathway enrichment
