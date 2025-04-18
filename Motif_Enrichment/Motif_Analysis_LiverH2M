@@ -15,17 +15,5 @@ meme-chip -oc meme_out_liver_h2m -dna -meme-nmotifs 10 -maxw 20 liver_human_to_m
 
 
 
-## Spleen Enhancer: Mouse → Human
 
-# Step 1: Remove duplicate BED entries
-sort -u spleen_mouse_to_human_enhancers.bed > spleen_mouse_to_human_enhancers_dedup.bed
-
-# Step 2: Center each region to 200 bp around midpoint
-awk 'BEGIN{OFS="\t"} {mid=int(($2+$3)/2); print $1, mid-100, mid+100}' spleen_mouse_to_human_enhancers_dedup.bed > spleen_mouse_to_human_enhancers_centered.bed
-
-# Step 3: Extract sequences from hg38 genome
-bedtools getfasta -fi hg38.fa -bed spleen_mouse_to_human_enhancers_centered.bed -fo spleen_mouse_to_human_enhancers_centered.fa
-
-# Step 4: Run motif enrichment
-meme-chip -oc meme_out_spleen_m2h -dna -meme-nmotifs 10 -maxw 20 spleen_mouse_to_human_enhancers_centered.fa
 
