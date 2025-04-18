@@ -1,18 +1,11 @@
-# === CLEANING ===
-# Filter valid BED lines with exactly 3 columns and positive coordinates
-awk 'NF>=3 && $2 >= 0 && $3 > $2' $HALPER_BED | cut -f1-3 | sort -k1,1 -k2,2n | uniq > $CLEANED_BED
+# Overlap Validation Pipeline
 
-# === VALIDATION ===
-# Use bedtools to find intersecting regions
-bedtools intersect -a $CLEANED_BED -b $ATAC_PEAKS -u > $VALIDATED_OUTPUT
+## Step 1: Clean BED file and sort
+cut -f1-3 input_raw.bed | sort -k1,1 -k2,2n > input_clean_sorted.bed
 
-# === SUMMARY STATS ===
-TOTAL=$(wc -l < $CLEANED_BED)
-OVERLAP=$(wc -l < $VALIDATED_OUTPUT)
-PERCENT=$(awk -v a=$OVERLAP -v b=$TOTAL 'BEGIN { printf "%.2f", (a/b)*100 }')
-echo "Total regions: $TOTAL" > $OVERLAP_STATS
-echo "Validated overlap: $OVERLAP" >> $OVERLAP_STATS
-echo "Percent overlap: $PERCENT%" >> $OVERLAP_STATS
+## Step 2: Intersect with target ATAC-seq peaks to validate conservation
+bedtools intersect -a input_clean_sorted.bed -b atac_peaks.bed -u > validated_overlap.bed
 
-# === DONE ===
-echo "Validation complete. Overlap: $PERCENT%"
+## Step 3: Calculate overlap percentage
+wc -l input_clean_sorted.bed > total_regions.txt
+wc -l validated_overlap.bed > conserved_regions.txt
