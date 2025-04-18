@@ -1,1 +1,15 @@
+## Step 1: Prepared BED files for upload
+# Ensured BED files have 3 columns only: chr, start, end
+cut -f1-3 input.bed > input_clean.bed
+
+## Step 2: Uploaded to [GREAT](http://great.stanford.edu/public/html/)
+# Options to set:
+# - Species Assembly: Chose hg38 for human or mm10 for mouse
+# - Test Regions: Uploaded the `input_clean.bed`
+# - Background Regions: Pre - set in GREAT
+
+## Step 3: Download results
+# - Enrichment tables (GO, Mouse/Human )
+# - Region-gene association graphs
+# - Saved PDF/Image sfor report use
 
