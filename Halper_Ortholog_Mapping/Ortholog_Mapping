@@ -1,0 +1,49 @@
+# HALPER Ortholog Mapping Pipeline
+
+## Step 1: Liftover Using halLiftover
+# Convert enhancer coordinates from source to target genome
+halLiftover \
+  alignment.hal \
+  source_genome \
+  source_enhancers.bed \
+  target_genome \
+  raw_liftover.bed
+
+## Step 2: Filter with HALPER
+# Clean and refine liftover output to valid orthologous regions
+halper.py \
+  -b raw_liftover.bed \
+  -s target_genome \
+  -q source_genome \
+  -o halper_filtered.bed \
+  -g target_genome.fa
+
+## Example for Liver Enhancer Human → Mouse
+halLiftover \
+  mammal.hal \
+  hg38 \
+  liver_human_enhancers.bed \
+  mm10 \
+  liver_human_to_mouse_liftover_raw.bed
+
+halper.py \
+  -b liver_human_to_mouse_liftover_raw.bed \
+  -s mm10 \
+  -q hg38 \
+  -o liver_human_to_mouse_enhancers.bed \
+  -g mm10.fa
+
+## Example for Spleen Enhancer Mouse → Human
+halLiftover \
+  mammal.hal \
+  mm10 \
+  spleen_mouse_enhancers.bed \
+  hg38 \
+  spleen_mouse_to_human_liftover_raw.bed
+
+halper.py \
+  -b spleen_mouse_to_human_liftover_raw.bed \
+  -s hg38 \
+  -q mm10 \
+  -o spleen_mouse_to_human_enhancers.bed \
+  -g hg38.fa
