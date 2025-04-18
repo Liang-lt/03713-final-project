@@ -1,0 +1,16 @@
+# GREAT Enrichment Pipeline (Post-motif analysis)
+
+## Step 1: Prepare BED files for upload
+# Ensure BED files have 3 columns only: chr, start, end
+cut -f1-3 input.bed > input_clean.bed
+
+## Step 2: Upload to [GREAT](http://great.stanford.edu/public/html/)
+# Options to set:
+# - Species Assembly: Choose hg38 for human or mm10 for mouse
+# - Test Regions: Upload your `input_clean.bed`
+# - Background Regions: You can skip this or upload a matched background if required
+
+## Step 3: Download results
+# - Enrichment tables (GO, Mouse/Human Phenotype, etc.)
+# - Region-gene association graphs
+# - Save PDF/CSV summaries for report use
