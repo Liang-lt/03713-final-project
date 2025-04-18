@@ -1,0 +1,13 @@
+## Spleen Enhancer: Human → Mouse
+
+# Step 1: Remove duplicate BED entries
+sort -u spleen_human_to_mouse_enhancers.bed > spleen_human_to_mouse_enhancers_dedup.bed
+
+# Step 2: Center each region to 200 bp around midpoint
+awk 'BEGIN{OFS="\t"} {mid=int(($2+$3)/2); print $1, mid-100, mid+100}' spleen_human_to_mouse_enhancers_dedup.bed > spleen_human_to_mouse_enhancers_centered.bed
+
+# Step 3: Extract sequences from mm10 genome
+bedtools getfasta -fi mm10.fa -bed spleen_human_to_mouse_enhancers_centered.bed -fo spleen_human_to_mouse_enhancers_centered.fa
+
+# Step 4: Run motif enrichment
+meme-chip -oc meme_out_spleen_h2m -dna -meme-nmotifs 10 -maxw 20 spleen_human_to_mouse_enhancers_centered.fa
