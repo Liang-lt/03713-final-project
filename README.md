@@ -95,6 +95,6 @@ Upload `.bed` regions via [great.stanford.edu](http://great.stanford.edu/) and r
 
 ## Authors & Contact
 - Harini Sundar — hsundar@andrew.cmu.edu
-- Litian Liang
-- Meiven Yang
-- Liyuan Liu
+- Litian Liang -- litianl@andrew.cmu.edu
+- Meiven Yang -- meiveny@andrew.cmu.edu
+- Liyuan Liu -- liyuanli@andrew.cmu.edu
