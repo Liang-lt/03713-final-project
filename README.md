@@ -87,6 +87,7 @@ Upload `.bed` regions via [great.stanford.edu](http://great.stanford.edu/) and r
 ---
 
 ## Citations
+- Cory Y McLean, Dave Bristor, Michael Hiller, Shoa L Clarke, Bruce T Schaar, Craig B Lowe, Aaron M Wenger, and Gill Bejerano. "GREAT improves functional interpretation of cis-regulatory regions". Nat. Biotechnol. 28(5):495-501, 2010. PMID 20436461
 - Zhang et al., 2008. MACS: ChIP-Seq analysis. *Genome Biol.*
 - HAL Tools & HALPER: Comparative Genomics Toolkit (GitHub)
 
