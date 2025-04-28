@@ -1,0 +1,13 @@
+Tissue Comparison Analysis Summary
+================================
+Human Tissue Comparison:
+Regions open in both liver and spleen: 20741 (27.4%)
+Liver-specific open regions: 37837 (50.1%)
+Spleen-specific open regions: 17008 (22.5%)
+Total regions: 75586
+
+Mouse Tissue Comparison:
+Regions open in both liver and spleen: 22556 (27.2%)
+Liver-specific open regions: 39666 (47.9%)
+Spleen-specific open regions: 20658 (24.9%)
+Total regions: 82880

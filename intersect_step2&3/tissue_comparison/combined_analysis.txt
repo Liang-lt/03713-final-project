@@ -1,0 +1,27 @@
+Combined Tissue Comparison Analysis
+=================================
+Raw Counts:
+-----------
+Human Analysis:
+Shared regions: 20741
+Liver-specific: 37837
+Spleen-specific: 17008
+Total: 75586
+
+Mouse Analysis:
+Shared regions: 22556
+Liver-specific: 39666
+Spleen-specific: 20658
+Total: 82880
+
+Proportions:
+-----------
+Human Proportions:
+Shared: 0.274
+Liver-specific: 0.501
+Spleen-specific: 0.225
+
+Mouse Proportions:
+Shared: 0.272
+Liver-specific: 0.479
+Spleen-specific: 0.249
