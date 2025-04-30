@@ -1,0 +1,65 @@
+# pipeline.py
+
+import os
+import subprocess
+from scripts.utils import setup_logger, run_command
+
+# Set up logging
+setup_logger("results/pipeline.log")
+
+# Define pipeline steps
+pipeline_steps = [
+    {
+        "name": "Step 1: ATAC-seq QC & Annotation",
+        "cmd": "bash scripts/01_qc_annotation.sh data/human_liver.bed results/human_liver_annotated.bed"
+    },
+    {
+        "name": "Step 2: Cross-Species Projection",
+        "cmd": "bash scripts/02_liftover.sh data/human_liver_annotated.bed results/liftover_h2m.bed data/hg38ToMm10.hal hg38 mm10"
+    },
+    {
+        "name": "Step 3: HALPER Filtering",
+        "cmd": "bash scripts/03_halper.sh results/liftover_h2m.bed results/halper_h2m"
+    },
+    {
+        "name": "Step 4: Validate with ATAC-seq",
+        "cmd": "bash scripts/04_validate_intersection.sh results/halper_h2m/filtered.bed data/mouse_liver_atac.bed results/conserved_enhancers.bed"
+    },
+    {
+        "name": "Step 5: Genomic Annotation",
+        "cmd": "Rscript scripts/05_annotate_conserved.R results/conserved_enhancers.bed results/enhancer_annotation.pdf"
+    },
+    {
+        "name": "Step 6: FASTA Extraction",
+        "cmd": "bash scripts/06_getfasta.sh results/conserved_enhancers.bed data/mm10.fa results/enhancers.fa"
+    },
+    {
+        "name": "Step 7: Motif Enrichment",
+        "cmd": "bash scripts/07_motif_discovery.sh results/enhancers.fa results/motifs"
+    }
+]
+
+# Run all steps with automatic retry
+MAX_RETRIES = 2
+
+for step in pipeline_steps:
+    print(f"\nRunning {step['name']}...")
+    attempt = 0
+    success = False
+
+    while attempt <= MAX_RETRIES and not success:
+        try:
+            run_command(step["cmd"], step["name"])
+            success = True
+        except subprocess.CalledProcessError:
+            attempt += 1
+            if attempt <= MAX_RETRIES:
+                print(f"Retrying {step['name']} (attempt {attempt})...")
+            else:
+                print(f"Step failed after {MAX_RETRIES + 1} attempts: {step['name']}")
+                break
+
+if success:
+    print("\nPipeline completed successfully.")
+else:
+    print("\nPipeline terminated due to failure.")
