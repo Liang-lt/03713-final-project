@@ -1,0 +1,67 @@
+# Snakefile
+
+rule all:
+    input:
+        "results/motifs/meme_chip.html"
+
+rule qc_annotation:
+    input:
+        "data/human_liver.bed"
+    output:
+        "results/human_liver_annotated.bed"
+    shell:
+        "bash scripts/01_qc_annotation.sh {input} {output}"
+
+rule liftover:
+    input:
+        bed="results/human_liver_annotated.bed",
+        hal="data/hg38ToMm10.hal"
+    output:
+        "results/liftover_h2m.bed"
+    params:
+        src="hg38",
+        tgt="mm10"
+    shell:
+        "bash scripts/02_liftover.sh {input.bed} {output} {input.hal} {params.src} {params.tgt}"
+
+rule halper:
+    input:
+        "results/liftover_h2m.bed"
+    output:
+        directory("results/halper_h2m")
+    shell:
+        "bash scripts/03_halper.sh {input} {output}"
+
+rule validate:
+    input:
+        enhancers="results/halper_h2m/filtered.bed",
+        atac="data/mouse_liver_atac.bed"
+    output:
+        "results/conserved_enhancers.bed"
+    shell:
+        "bash scripts/04_validate_intersection.sh {input.enhancers} {input.atac} {output}"
+
+rule annotate:
+    input:
+        "results/conserved_enhancers.bed"
+    output:
+        "results/enhancer_annotation.pdf"
+    shell:
+        "Rscript scripts/05_annotate_conserved.R {input} {output}"
+
+rule getfasta:
+    input:
+        bed="results/conserved_enhancers.bed",
+        fasta="data/mm10.fa"
+    output:
+        "results/enhancers.fa"
+    shell:
+        "bash scripts/06_getfasta.sh {input.bed} {input.fasta} {output}"
+
+rule motif:
+    input:
+        "results/enhancers.fa"
+    output:
+        "results/motifs/meme_chip.html"
+    shell:
+        "bash scripts/07_motif_discovery.sh {input} results/motifs"
