@@ -1,0 +1,42 @@
+#!/bin/bash
+set -e
+
+# Output directory
+mkdir -p results/fasta
+
+# Define genomes
+HG38="data/hg38.fa"
+MM10="data/mm10.fa"
+
+# Define list of combinations
+declare -a tissues=("liver" "spleen")
+declare -a directions=("h2m" "m2h")
+declare -a classes=("enhancers" "promoters")
+
+# Loop through all 8 combinations
+for tissue in "${tissues[@]}"; do
+  for direction in "${directions[@]}"; do
+    for class in "${classes[@]}"; do
+
+      # Construct filenames
+      bedfile="results/bed/${tissue}_${direction}_${class}.bed"
+      fastaout="results/fasta/${tissue}_${direction}_${class}.fa"
+
+      # Choose reference genome
+      if [[ "$direction" == "h2m" ]]; then
+        ref=$MM10
+      else
+        ref=$HG38
+      fi
+
+      # Run bedtools getfasta
+      if [[ -f "$bedfile" ]]; then
+        echo "[INFO] Generating FASTA for $bedfile"
+        bedtools getfasta -fi $ref -bed $bedfile -fo $fastaout
+      else
+        echo "[WARN] Missing BED file: $bedfile"
+      fi
+
+    done
+  done
+done
