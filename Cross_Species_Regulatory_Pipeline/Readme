@@ -22,10 +22,48 @@ This project explores the evolutionary conservation of regulatory elements by:
 
 ## Folder Structure
 
-cross-species-regulatory-pipeline/ ├── data/ # Input ATAC-seq peaks, HAL file, genome FASTAs 
-├── results/ # Output: conserved enhancers, motifs, annotations ├── scripts/ # Modular shell/R/Python scripts 
-├── envs/ # Conda environment file ├── pipeline.py # Optional Python runner ├── Snakefile # Snakemake pipeline └── README.md
+```
+cross-species-regulatory-pipeline/
+├── data/                    # Input ATAC-seq peaks, HAL file, genome FASTAs
+├── results/                 # Output: conserved enhancers, motifs, annotations
+├── scripts/                 # Modular shell/R/Python scripts
+├── envs/                    # Conda environment file
+├── pipeline.py              # Optional Python runner (with retry and logging)
+├── Snakefile                # Snakemake pipeline
+├── run_pipeline.sh          # Shell-based pipeline script
+└── README.md
+```
 
+---
+
+## Pipeline Execution Options
+
+This repository provides **three ways** to execute the pipeline:
+
+### 1. Python-Based Pipeline (`pipeline.py`)
+- Sequential runner with automatic retry logic (3 attempts)
+- Logs to `results/pipeline.log`
+- Easy to customize in Python
+
+```bash
+python pipeline.py
+```
+
+### 2. Snakemake Workflow (`Snakefile`)
+- Modular, rule-based pipeline manager
+- Automatically handles dependencies, reruns only missing steps
+
+```bash
+snakemake --cores 1
+```
+
+### 3. Shell Script (`run_pipeline.sh`)
+- Linear bash script with logging
+- Fails fast if any step fails
+
+```bash
+bash run_pipeline.sh
+```
 
 ---
 
@@ -81,34 +119,28 @@ cross-species-regulatory-pipeline/ ├── data/ # Input ATAC-seq peaks, HAL f
 git clone https://github.com/YOUR_USERNAME/cross-species-regulatory-pipeline.git
 cd cross-species-regulatory-pipeline
 
-## Example Usage
-bash
-Copy
-Edit
-# Run individual modules
-bash scripts/01_qc_annotation.sh data/human_liver.bed results/human_liver_annotated.bed
-bash scripts/02_liftover.sh ...
-bash scripts/03_halper.sh ...
-bash scripts/04_validate_intersection.sh ...
-Rscript scripts/05_annotate_conserved.R ...
-bash scripts/06_getfasta.sh ...
-bash scripts/07_motif_discovery.sh ...
-
-# Or run the entire pipeline
-python pipeline.py
-
-
-## Example Outputs
-conserved_enhancers.bed: BED file of validated cross-species enhancers overlapping ATAC-seq peaks
-
-enhancer_annotation.pdf: Bar plot summarizing genomic context (promoter, intron, intergenic, etc.)
-
-motifs/: Folder containing MEME-ChIP output, motif logos, and enriched TFs
-
-GO_enrichment.tsv: Functional enrichment results from GREAT (GO terms, phenotypes)
-
-
 # Create and activate conda environment
 conda env create -f envs/environment.yaml
 conda activate enhancer-pipeline
+```
 
+---
+
+## Example Outputs
+
+- `conserved_enhancers.bed`: BED file of validated cross-species enhancers overlapping ATAC-seq peaks  
+- `enhancer_annotation.pdf`: Bar plot summarizing genomic context (promoter, intron, intergenic, etc.)  
+- `motifs/`: Folder containing MEME-ChIP output, motif logos, and enriched TFs  
+- `GO_enrichment.tsv`: Functional enrichment results from GREAT (GO terms, phenotypes)
+
+---
+
+## License
+
+MIT License. See the `LICENSE` file for full terms.
+
+---
+
+## Questions or Contributions
+
+Open an issue or pull request on GitHub. 
