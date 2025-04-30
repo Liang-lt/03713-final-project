@@ -1,0 +1,107 @@
+# Cross-Species Regulatory Conservation Pipeline
+
+This repository contains a reproducible pipeline for identifying and functionally annotating conserved enhancers across human and mouse tissues using ATAC-seq data, HAL genome alignments, and motif enrichment tools. The pipeline handles everything from raw enhancer inputs through functional motif discovery and biological interpretation.
+
+---
+
+## Overview
+
+This project investigates tissue-specific and shared regulatory logic across species by:
+
+- Performing ATAC-seq quality control and peak annotation
+- Mapping candidate enhancers between species using HAL liftover
+- Filtering conserved orthologs with HALPER
+- Validating enhancers via overlap with target-species ATAC-seq data
+- Annotating conserved elements with ChIPseeker
+- Extracting sequences and discovering motifs (MEME-ChIP)
+- Performing GO enrichment using GREAT
+
+---
+
+## Folder Structure
+
+cross-species-regulatory-pipeline/ ├── data/ # ATAC-seq peaks, HAL file, genomes ├── results/ # Outputs: conserved enhancers, motifs, plots ├── scripts/ # Modular scripts: QC, mapping, enrichment ├── envs/ # Conda environment files ├── pipeline.py # Python runner (optional) ├── Snakefile # Reproducible pipeline (Snakemake) ├── README.md 
+
+
+---
+
+## Workflow Summary
+
+### Step 1: ATAC-seq QC & Peak Annotation
+- Input: raw or processed ATAC-seq peak files
+- Tool: custom scripts, optionally ChIPseeker
+- Output: filtered BED files, annotation summary
+
+### Step 2: Enhancer Candidate Selection
+- Use enhancer BEDs (intergenic/intronic regions)
+- Optional: refine with chromHMM or H3K27ac/H3K4me1
+
+### Step 3: Cross-Species Projection
+- Tool: `halLiftover`
+- Input: human or mouse enhancer BED + HAL file
+- Output: lifted BED in target species
+
+### Step 4: Filtering Orthologous Enhancers
+- Tool: `HALPER`
+- Output: filtered orthologs BED file
+
+### Step 5: Functional Validation with ATAC-seq
+- Tool: `bedtools intersect`
+- Output: conserved open chromatin regions
+
+### Step 6: Genomic Annotation
+- Tool: `ChIPseeker` in R
+- Output: bar plots, genomic class distribution
+
+### Step 7: FASTA Sequence Extraction
+- Tool: `bedtools getfasta`
+- Output: enhancer FASTA files (centered, deduplicated)
+
+### Step 8: Motif Enrichment
+- Tool: `MEME-ChIP`, `FIMO`
+- Output: motif logos, sites, enriched TF families
+
+### Step 9: Functional Enrichment
+- Tool: `GREAT` (GO terms, phenotypes)
+- Output: enrichment tables and plots
+
+### Step 10 (Optional): Promoter Comparison
+- Map promoters using TSS ± 1kb
+- Compare conservation vs enhancers
+
+---
+
+## Environment Setup
+
+```bash
+# Clone and move into directory
+git clone https://github.com/YOUR_USERNAME/cross-species-regulatory-pipeline.git
+cd cross-species-regulatory-pipeline
+
+# Create environment
+conda env create -f envs/environment.yaml
+conda activate enhancer-pipeline
+
+## Example Usage
+# Run each step manually
+bash scripts/01_qc_annotation.sh data/human_liver.bed results/human_liver_annotated.bed
+bash scripts/02_liftover.sh ...
+bash scripts/03_halper.sh ...
+bash scripts/04_validate_intersection.sh ...
+Rscript scripts/05_annotate_conserved.R ...
+bash scripts/06_getfasta.sh ...
+bash scripts/07_motif_discovery.sh ...
+# or run the full pipeline
+python pipeline.py
+
+### Example Outputs
+
+- `conserved_enhancers.bed`  
+  → BED file of validated cross-species enhancers overlapping ATAC-seq peaks
+
+- `enhancer_annotation.pdf`  
+  → Bar plot summarizing genomic context (promoter, intron, intergenic, etc.) of conserved regions
+
+- `motifs/`  
+  → Folder containing
+
