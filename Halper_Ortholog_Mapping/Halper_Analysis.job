@@ -3,11 +3,16 @@
 #SBATCH -t 24:00:00
 #SBATCH --ntasks-per-node=4
 
+# Load user environment and activate the hal conda environment
+source ~/.bashrc
+conda activate hal
+
 # Load bedtools module
 module load bedtools
 
 # Set paths for readability
 ORIG_DIR="/ocean/projects/bio230007p/lliang1/mapping_w_results"
+HALPER_DIR="${ORIG_DIR}/halper_result"
 
 # Original peak files
 LIVER_HUMAN="${ORIG_DIR}/idr.optimal_peak_liver_human.narrowPeak"
@@ -15,8 +20,91 @@ LIVER_MOUSE="${ORIG_DIR}/idr.optimal_peak_liver_mouse.narrowPeak"
 SPLEEN_HUMAN="${ORIG_DIR}/idr.optimal_peak_spleen_human.narrowPeak"
 SPLEEN_MOUSE="${ORIG_DIR}/idr.optimal_peak_spleen_mouse.narrowPeak"
 
-# Create output directory
+# HALPER mapped files
+SPLEEN_M2H="${HALPER_DIR}_mouse_human_spleen/idr.optimal_peak_spleen_mouse.MouseToHuman.HALPER.narrowPeak"
+LIVER_M2H="${HALPER_DIR}_mouse_human_liver/idr.optimal_peak_liver_mouse.MouseToHuman.HALPER.narrowPeak"
+SPLEEN_H2M="${HALPER_DIR}_human_mouse_spleen/idr.optimal_peak_spleen_human.HumanToMouse.HALPER.narrowPeak"
+LIVER_H2M="${HALPER_DIR}_human_mouse_liver/idr.optimal_peak_liver_human.HumanToMouse.HALPER.narrowPeak"
+
+# Create output directories
 mkdir -p ./intersect
+
+#######################
+# PART 1: Species Conservation Analysis
+#######################
+
+echo "Starting species conservation analysis..."
+
+# Analyze spleen mouse->human conservation
+echo "Analyzing spleen mouse->human conservation..."
+# Find mouse regions that map to open human regions
+bedtools intersect -a $SPLEEN_M2H -b $SPLEEN_HUMAN -wa -wb > ./intersect/spleen_m2h_open.bed
+# Find mouse regions that map but don't overlap human open regions
+bedtools intersect -a $SPLEEN_M2H -b $SPLEEN_HUMAN -v > ./intersect/spleen_m2h_closed.bed
+
+# Analyze spleen human->mouse conservation  
+echo "Analyzing spleen human->mouse conservation..."
+# Find human regions that map to open mouse regions
+bedtools intersect -a $SPLEEN_H2M -b $SPLEEN_MOUSE -wa -wb > ./intersect/spleen_h2m_open.bed
+# Find human regions that map but don't overlap mouse open regions
+bedtools intersect -a $SPLEEN_H2M -b $SPLEEN_MOUSE -v > ./intersect/spleen_h2m_closed.bed
+
+# Analyze liver mouse->human conservation
+echo "Analyzing liver mouse->human conservation..."
+# Find mouse regions that map to open human regions
+bedtools intersect -a $LIVER_M2H -b $LIVER_HUMAN -wa -wb > ./intersect/liver_m2h_open.bed
+# Find mouse regions that map but don't overlap human open regions
+bedtools intersect -a $LIVER_M2H -b $LIVER_HUMAN -v > ./intersect/liver_m2h_closed.bed
+
+# Analyze liver human->mouse conservation
+echo "Analyzing liver human->mouse conservation..."
+# Find human regions that map to open mouse regions
+bedtools intersect -a $LIVER_H2M -b $LIVER_MOUSE -wa -wb > ./intersect/liver_h2m_open.bed
+# Find human regions that map but don't overlap mouse open regions
+bedtools intersect -a $LIVER_H2M -b $LIVER_MOUSE -v > ./intersect/liver_h2m_closed.bed
+
+# Write species conservation summary to file
+{
+echo "Conservation Analysis Summary"
+echo "==========================="
+echo "Spleen Mouse->Human:"
+SPLEEN_M2H_OPEN=$(wc -l < ./intersect/spleen_m2h_open.bed)
+SPLEEN_M2H_CLOSED=$(wc -l < ./intersect/spleen_m2h_closed.bed)
+SPLEEN_M2H_TOTAL=$((SPLEEN_M2H_OPEN + SPLEEN_M2H_CLOSED))
+echo "Open regions conserved: $SPLEEN_M2H_OPEN"
+echo "Open regions not conserved: $SPLEEN_M2H_CLOSED"
+echo "Proportion conserved: $(bc -l <<< "scale=3; $SPLEEN_M2H_OPEN / $SPLEEN_M2H_TOTAL")"
+echo ""
+echo "Spleen Human->Mouse:"
+SPLEEN_H2M_OPEN=$(wc -l < ./intersect/spleen_h2m_open.bed)
+SPLEEN_H2M_CLOSED=$(wc -l < ./intersect/spleen_h2m_closed.bed)
+SPLEEN_H2M_TOTAL=$((SPLEEN_H2M_OPEN + SPLEEN_H2M_CLOSED))
+echo "Open regions conserved: $SPLEEN_H2M_OPEN"
+echo "Open regions not conserved: $SPLEEN_H2M_CLOSED"
+echo "Proportion conserved: $(bc -l <<< "scale=3; $SPLEEN_H2M_OPEN / $SPLEEN_H2M_TOTAL")"
+echo ""
+echo "Liver Mouse->Human:"
+LIVER_M2H_OPEN=$(wc -l < ./intersect/liver_m2h_open.bed)
+LIVER_M2H_CLOSED=$(wc -l < ./intersect/liver_m2h_closed.bed)
+LIVER_M2H_TOTAL=$((LIVER_M2H_OPEN + LIVER_M2H_CLOSED))
+echo "Open regions conserved: $LIVER_M2H_OPEN"
+echo "Open regions not conserved: $LIVER_M2H_CLOSED"
+echo "Proportion conserved: $(bc -l <<< "scale=3; $LIVER_M2H_OPEN / $LIVER_M2H_TOTAL")"
+echo ""
+echo "Liver Human->Mouse:"
+LIVER_H2M_OPEN=$(wc -l < ./intersect/liver_h2m_open.bed)
+LIVER_H2M_CLOSED=$(wc -l < ./intersect/liver_h2m_closed.bed)
+LIVER_H2M_TOTAL=$((LIVER_H2M_OPEN + LIVER_H2M_CLOSED))
+echo "Open regions conserved: $LIVER_H2M_OPEN"
+echo "Open regions not conserved: $LIVER_H2M_CLOSED"
+echo "Proportion conserved: $(bc -l <<< "scale=3; $LIVER_H2M_OPEN / $LIVER_H2M_TOTAL")"
+} > ./intersect/conservation_analysis.txt
+
+#######################
+# PART 2: Tissue Comparison Analysis
+#######################
+
+echo "Starting tissue comparison analysis..."
 
 # Analyze human tissue comparison
 echo "Analyzing human liver vs spleen comparison..."
@@ -36,7 +124,7 @@ bedtools intersect -a $LIVER_MOUSE -b $SPLEEN_MOUSE -v > ./intersect/mouse_liver
 # Find spleen-specific open regions
 bedtools intersect -a $SPLEEN_MOUSE -b $LIVER_MOUSE -v > ./intersect/mouse_spleen_specific.bed
 
-# Write summary to file
+# Write tissue comparison summary to file
 {
     # Calculate totals for percentages
     HUMAN_SHARED=$(wc -l < ./intersect/human_shared_open.bed)
@@ -93,3 +181,5 @@ bedtools intersect -a $SPLEEN_MOUSE -b $LIVER_MOUSE -v > ./intersect/mouse_splee
     echo "Spleen-specific open regions: $MOUSE_SPLEEN ($(awk "BEGIN {printf \"%.1f%%\", $MOUSE_SPLEEN*100/$MOUSE_TOTAL}"))" | tee -a ./intersect/tissue_comparison.txt
     echo "Total regions: $MOUSE_TOTAL" | tee -a ./intersect/tissue_comparison.txt
 }
+
+echo "All analyses complete. Results saved in ./intersect/ directory."
